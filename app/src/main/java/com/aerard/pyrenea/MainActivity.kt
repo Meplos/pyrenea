@@ -1,5 +1,7 @@
 package com.aerard.pyrenea
 
+import android.graphics.Color
+import android.graphics.Paint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -51,6 +53,7 @@ class MainActivity : ComponentActivity() {
                                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                                         mapViewModel.state.collect {
                                             val p: Polyline = Polyline(this@apply, true)
+                                            p.outlinePaint.color= Color.parseColor(it.gpxPathColor)
                                             it.gpxPath.forEach(p::addPoint)
                                             overlayManager.add(p)
                                             invalidate()
@@ -66,7 +69,7 @@ class MainActivity : ComponentActivity() {
 }
 
 
-data class MapState (val gpxPath : List<GeoPoint> = listOf(), val gpxPathColor: String = "#000000")
+data class MapState (val gpxPath : List<GeoPoint> = listOf(), val gpxPathColor: String= "#efc23e")
 
 class MapViewViewModel() : ViewModel() {
     private val _state = MutableStateFlow(MapState())
