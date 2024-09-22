@@ -39,6 +39,7 @@ import java.io.InputStream
 class MainActivity() : ComponentActivity() {
 
     private val mapViewModel: MapViewViewModel by viewModels()
+    val locationRequest = LocationRequest.Builder(2_500, ).setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY).setWaitForAccurateLocation(true).build()
 
     private  lateinit var fusedLocationService: FusedLocationProviderClient
     private var isLocationGranted =false
@@ -68,7 +69,6 @@ class MainActivity() : ComponentActivity() {
             }
         }
         if (isLocationGranted) {
-            val locationRequest = LocationRequest.Builder(5_000, ).setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY).setWaitForAccurateLocation(true).build()
             fusedLocationService.requestLocationUpdates(locationRequest, mapViewModel.locationCallback, Looper.getMainLooper())
         }
 
@@ -78,18 +78,27 @@ class MainActivity() : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        locationPermissionRequest.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
         fusedLocationService = LocationServices.getFusedLocationProviderClient(this)
-
-
         enableEdgeToEdge()
         setContent {
             PyreneaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { inner ->
                     val uiState by mapViewModel.state.collectAsStateWithLifecycle()
+                    if (isLocationGranted) {
+                        fusedLocationService.lastLocation.addOnSuccessListener{ location : Location?->
+                            if (location != null) {
+                                mapViewModel.setLocation(location)
+                            }
+                        }
+                    }
+
                     PyreneaMapScreen(inner, uiState, object : PyreneaMapController {
                         override fun handleZoom(value: Double) {
                            mapViewModel.setZoom(value)
+                        }
+
+                        override fun setCenter() {
+                           mapViewModel.setCenter()
                         }
 
                         override fun onFileImportClick() {
@@ -101,8 +110,9 @@ class MainActivity() : ComponentActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
+        locationPermissionRequest.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
     }
 
     override fun onStop() {

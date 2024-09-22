@@ -14,7 +14,13 @@ import kotlinx.coroutines.flow.update
 import org.osmdroid.util.GeoPoint
 import java.io.InputStream
 
-data class MapState(val gpxPath: List<GeoPoint> = listOf(), val gpxPathColor: String = "#efc23e", val zoomLevel: Double = 15.0, val location: Location? = null)
+data class MapState(
+    val gpxPath: List<GeoPoint> = listOf(),
+    val gpxPathColor: String = "#efc23e",
+    val zoomLevel: Double = 15.0,
+    val location: Location? = null,
+    val isCenterSet: Boolean = false
+    )
 
 class MapViewViewModel() : ViewModel() {
     private val _state = MutableStateFlow(MapState())
@@ -22,14 +28,24 @@ class MapViewViewModel() : ViewModel() {
     val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val location = locationResult.lastLocation
-            Log.d("Pyrenea", "Location : $location")
-            _state.update { currentState ->
-                currentState.copy(
-                    location = locationResult.lastLocation
-                )
+            Log.d("Pyrenea", "Location updated : $location")
+            setLocation(location)
+        }
+    }
+    fun setLocation(location: Location?) {
+        _state.update { currentState ->
+            currentState.copy(
+                location = location
+            )
 
-            }
+        }
+    }
 
+    fun setCenter() {
+        _state.update { currentState ->
+            currentState.copy(
+                isCenterSet = true
+            )
         }
     }
 
