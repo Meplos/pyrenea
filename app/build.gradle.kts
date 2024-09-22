@@ -50,6 +50,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.material.icons.extended)
     implementation (libs.android.gpx.parser)
     implementation(libs.osmdroid.android)
