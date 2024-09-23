@@ -40,6 +40,8 @@ import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.views.CustomZoomButtonsController
+import org.osmdroid.views.CustomZoomButtonsDisplay
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.IconOverlay
 import org.osmdroid.views.overlay.Marker
@@ -84,6 +86,7 @@ fun PyreneaMapScreen(
                         minZoomLevel = 8.0
                         controller.setZoom(uiState.zoomLevel)
                         setMultiTouchControls(true)
+                        zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
                         setTileSource(TileSourceFactory.OpenTopo)
                     }
                 },
