@@ -11,7 +11,7 @@ android {
         applicationId = "com.aerard.pyrenea"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
+        versionCode = 2
         versionName = "OSSAU - 1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
