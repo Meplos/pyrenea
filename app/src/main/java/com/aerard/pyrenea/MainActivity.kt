@@ -35,11 +35,12 @@ import kotlinx.coroutines.flow.update
 import org.osmdroid.api.IGeoPoint
 import org.osmdroid.util.GeoPoint
 import java.io.InputStream
+import kotlin.time.Duration.Companion.seconds
 
 class MainActivity() : ComponentActivity() {
 
     private val mapViewModel: MapViewViewModel by viewModels()
-    val locationRequest = LocationRequest.Builder(2_500, ).setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY).setWaitForAccurateLocation(true).build()
+    val locationRequest = LocationRequest.Builder(1.seconds.inWholeMilliseconds).setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY).setWaitForAccurateLocation(true).build()
 
     private  lateinit var fusedLocationService: FusedLocationProviderClient
     private var isLocationGranted =false
@@ -99,6 +100,10 @@ class MainActivity() : ComponentActivity() {
 
                         override fun setCenter() {
                            mapViewModel.setCenter()
+                        }
+
+                        override fun removeCenter() {
+                           mapViewModel.removeCenter()
                         }
 
                         override fun onFileImportClick() {

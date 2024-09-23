@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.aerard.pyrenea.map.service.gpx.GpxLoader
 import com.aerard.pyrenea.map.service.gpx.GpxParserAdapter
+import com.aerard.pyrenea.map.service.gpx.PWaypoint
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,8 @@ data class MapState(
     val gpxPathColor: String = "#efc23e",
     val zoomLevel: Double = 15.0,
     val location: Location? = null,
-    val isCenterSet: Boolean = false
+    val isCenterSet: Boolean = false,
+    val gpxWaypoints: List<PWaypoint> = listOf()
     )
 
 class MapViewViewModel() : ViewModel() {
@@ -49,12 +51,20 @@ class MapViewViewModel() : ViewModel() {
         }
     }
 
-    fun onGpxFileChange(input: InputStream) {
-        Log.d("Pyrenea", "OnGpxFileChange")
-        val path = GpxLoader(GpxParserAdapter()).loadGpx(input)
+    fun removeCenter() {
         _state.update { currentState ->
             currentState.copy(
-                gpxPath = path
+                isCenterSet = false
+            )
+        }
+    }
+    fun onGpxFileChange(input: InputStream) {
+        Log.d("Pyrenea", "OnGpxFileChange")
+        val gpxData = GpxLoader(GpxParserAdapter()).loadGpx(input)
+        _state.update { currentState ->
+            currentState.copy(
+                gpxPath = gpxData.track,
+                gpxWaypoints = gpxData.waypoints
             )
         }
     }
