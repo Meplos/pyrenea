@@ -105,30 +105,44 @@ fun PyreneaMapScreen(
                         view.overlayManager.add(lastPath)
                         val start = uiState.gpxPath.first()
                         val end = uiState.gpxPath.last()
+                        if(start.distanceToAsDouble(end) < 100) {
+                            val startMarker = Marker(view).apply {
+                                position = start
+                                icon = getDrawable(
+                                    view.context,
+                                    R.drawable.baseline_flag_circle_24
+                                )
 
-                        val startMarker = Marker(view).apply {
-                            position = start
-                            icon = getDrawable(
-                                view.context,
-                                R.drawable.baseline_location_pin_24
-                            )?.mutate()?.apply {
-                                setTint(Color.parseColor("#8DECB4"))
+                                title = "Départ - Arrivé"
+                                setInfoWindow(info)
                             }
-                            title = "Départ"
-                            setInfoWindow(info)
+                            view.overlayManager.add(startMarker)
+                        } else {
+                            val startMarker = Marker(view).apply {
+                                position = start
+                                icon = getDrawable(
+                                    view.context,
+                                    R.drawable.baseline_flag_24
+                                )?.mutate()?.apply {
+                                    setTint(Color.parseColor("#8DECB4"))
+                                }
+                                title = "Départ"
+                                setInfoWindow(info)
+                            }
+
+                            val endMarker = Marker(view).apply {
+                                position = end
+                                icon = getDrawable(
+                                    view.context,
+                                    R.drawable.baseline_flag_24
+                                )?.mutate()?.apply { setTint(Color.parseColor("#C9484D"))}
+                                title = "Arrivé"
+                                setInfoWindow(info)
+                            }
+
+                            view.overlayManager.addAll(listOf(startMarker, endMarker))
                         }
 
-                        val endMarker = Marker(view).apply {
-                            position = end
-                            icon = getDrawable(
-                                view.context,
-                                R.drawable.baseline_location_pin_24
-                            )
-                            title = "Arrivé"
-                            setInfoWindow(info)
-                        }
-
-                        view.overlayManager.addAll(listOf(startMarker, endMarker))
                     }
 
                     if (uiState.gpxWaypoints.isNotEmpty()) {

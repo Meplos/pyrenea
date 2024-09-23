@@ -17,7 +17,7 @@ import java.io.InputStream
 
 data class MapState(
     val gpxPath: List<GeoPoint> = listOf(),
-    val gpxPathColor: String = "#efc23e",
+    val gpxPathColor: String = "#ef6c00",
     val zoomLevel: Double = 15.0,
     val location: Location? = null,
     val isCenterSet: Boolean = false,
