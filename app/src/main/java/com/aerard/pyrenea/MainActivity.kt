@@ -1,6 +1,7 @@
 package com.aerard.pyrenea
 
 import android.Manifest
+import android.hardware.SensorManager
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aerard.pyrenea.map.ui.PMapController
 import com.aerard.pyrenea.map.ui.PMapScreen
+import com.aerard.pyrenea.map.vm.OrientationViewModel
 import com.aerard.pyrenea.map.vm.PMapViewModel
 import com.aerard.pyrenea.ui.theme.PyreneaTheme
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -30,6 +32,8 @@ import kotlin.time.Duration.Companion.seconds
 class MainActivity() : ComponentActivity() {
 
     private val mapViewModel: PMapViewModel by viewModels()
+    private  val orientationViewModel : OrientationViewModel by viewModels()
+
     val locationRequest = LocationRequest.Builder(1.seconds.inWholeMilliseconds).setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY).setWaitForAccurateLocation(true).build()
 
     private  lateinit var fusedLocationService: FusedLocationProviderClient
@@ -70,11 +74,13 @@ class MainActivity() : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         fusedLocationService = LocationServices.getFusedLocationProviderClient(this)
+        orientationViewModel.setSensorManager(getSystemService(SENSOR_SERVICE) as SensorManager)
         enableEdgeToEdge()
         setContent {
             PyreneaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { inner ->
                     val uiState by mapViewModel.state.collectAsStateWithLifecycle()
+                    val orientationState by orientationViewModel.state.collectAsStateWithLifecycle()
                     if (isLocationGranted) {
                         fusedLocationService.lastLocation.addOnSuccessListener{ location : Location?->
                             if (location != null) {
@@ -83,7 +89,7 @@ class MainActivity() : ComponentActivity() {
                         }
                     }
 
-                    PMapScreen(inner, uiState, object : PMapController {
+                    PMapScreen(inner, uiState, orientationState ,object : PMapController {
                         lateinit var map : MapView
                         override fun handleZoom(value: Double) {
                            mapViewModel.setZoom(value)
@@ -124,11 +130,13 @@ class MainActivity() : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         locationPermissionRequest.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+        orientationViewModel.listen()
     }
 
     override fun onStop() {
         super.onStop()
         fusedLocationService.removeLocationUpdates(mapViewModel.locationCallback)
+        orientationViewModel.stopListen()
     }
 
     private fun openFileChooser() {

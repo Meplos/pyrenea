@@ -1,6 +1,8 @@
 package com.aerard.pyrenea.map.ui
 
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,11 +23,13 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat.getDrawable
 import com.aerard.pyrenea.R
+import com.aerard.pyrenea.map.vm.OrientationState
 import com.aerard.pyrenea.map.vm.PMapState
 import com.aerard.pyrenea.ui.theme.HunterGreen
 import com.aerard.pyrenea.ui.theme.Parchement
@@ -41,6 +45,7 @@ import org.osmdroid.views.overlay.IconOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.infowindow.MarkerInfoWindow
+import org.osmdroid.views.overlay.mylocation.DirectedLocationOverlay
 import kotlin.math.abs
 
 interface PMapController {
@@ -55,7 +60,7 @@ interface PMapController {
 
 @Composable
 fun PMapScreen(
-    inner: PaddingValues, uiState: PMapState, mapController: PMapController,
+    inner: PaddingValues, uiState: PMapState,orientationState: OrientationState, mapController: PMapController,
 ) {
     Box(
         modifier = Modifier
@@ -64,14 +69,14 @@ fun PMapScreen(
             .fillMaxSize()
     ) {
         Box() {
-            PMap(mapController, uiState)
+            PMap(mapController, uiState, orientationState)
         }
         PMainMenu(Modifier.matchParentSize(), mapController, uiState)
     }
 }
 
 @Composable
-fun PMap(mapController: PMapController, uiState: PMapState) {
+fun PMap(mapController: PMapController, uiState: PMapState, orientationState: OrientationState) {
     var lastPath: Polyline? = null
     AndroidView(
         factory = { context ->
@@ -175,14 +180,21 @@ fun PMap(mapController: PMapController, uiState: PMapState) {
             }
 
             if (uiState.location != null ) {
-                val positionIcon = IconOverlay()
-                positionIcon.set(
-                    uiState.location.toGeopoint(), getDrawable(
-                        view.context,
-                        R.drawable.baseline_navigation_24
-                    )
-                )
-                view.overlayManager.add(positionIcon)
+                val marker = DirectedLocationOverlay(view.context)
+                val vectorDrawable = getDrawable(view.context, R.drawable.baseline_navigation_24)
+                vectorDrawable?.let { vector ->
+                    val bitmap = Bitmap.createBitmap(
+                        vector.getIntrinsicWidth(),
+                        vector.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                    val canvas = android.graphics.Canvas(bitmap)
+                    vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                    vector.draw(canvas)
+                    marker.setDirectionArrow(bitmap)
+                }
+
+                marker.setBearing(orientationState.north.toFloat())
+                marker.location = uiState.location.toGeopoint()
+                view.overlayManager.add(marker)
                 if (uiState.isFollowing) {
                     view.setExpectedCenter(uiState.location.toGeopoint())
                 }
