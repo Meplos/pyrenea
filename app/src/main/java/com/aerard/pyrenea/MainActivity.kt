@@ -14,32 +14,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.aerard.pyrenea.map.ui.PyreneaMapController
-import com.aerard.pyrenea.map.ui.PyreneaMapScreen
-import com.aerard.pyrenea.map.vm.MapViewViewModel
+import com.aerard.pyrenea.map.ui.PMapController
+import com.aerard.pyrenea.map.ui.PMapScreen
+import com.aerard.pyrenea.map.vm.PMapViewModel
 import com.aerard.pyrenea.ui.theme.PyreneaTheme
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import io.ticofab.androidgpxparser.parser.GPXParser
-import io.ticofab.androidgpxparser.parser.domain.Gpx
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import org.osmdroid.api.IGeoPoint
 import org.osmdroid.util.GeoPoint
-import java.io.InputStream
+import org.osmdroid.views.MapView
 import kotlin.time.Duration.Companion.seconds
 
 class MainActivity() : ComponentActivity() {
 
-    private val mapViewModel: MapViewViewModel by viewModels()
+    private val mapViewModel: PMapViewModel by viewModels()
     val locationRequest = LocationRequest.Builder(1.seconds.inWholeMilliseconds).setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY).setWaitForAccurateLocation(true).build()
 
     private  lateinit var fusedLocationService: FusedLocationProviderClient
@@ -93,22 +83,38 @@ class MainActivity() : ComponentActivity() {
                         }
                     }
 
-                    PyreneaMapScreen(inner, uiState, object : PyreneaMapController {
+                    PMapScreen(inner, uiState, object : PMapController {
+                        lateinit var map : MapView
                         override fun handleZoom(value: Double) {
                            mapViewModel.setZoom(value)
                         }
 
-                        override fun setCenter() {
-                           mapViewModel.setCenter()
+                        override fun setCenter(c : GeoPoint) {
+                            mapViewModel.disableFollow()
+                            map.controller?.setCenter(c)
                         }
 
-                        override fun removeCenter() {
-                           mapViewModel.removeCenter()
+                        override fun enableFollowing() {
+                            mapViewModel.enableFollow()
+                        }
+
+                        override fun disableFollowing() {
+                           mapViewModel.disableFollow()
+                        }
+
+                        override fun clearGpxData() {
+                            mapViewModel.clearGpxData()
+                        }
+
+                        override fun bind(view: MapView) {
+                            map = view
+                            Log.d("Pyrenea", "Bind map : $view")
                         }
 
                         override fun onFileImportClick() {
                             openFileChooser()
                         }
+
                     })
                 }
             }
