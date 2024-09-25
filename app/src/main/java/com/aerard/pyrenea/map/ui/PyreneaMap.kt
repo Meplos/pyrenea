@@ -15,6 +15,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.LocationOff
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Route
@@ -56,6 +58,8 @@ interface PMapController {
     fun enableFollowing()
     fun disableFollowing()
     fun clearGpxData()
+    fun hideWaypoint()
+    fun displayWaypoint()
 }
 
 @Composable
@@ -159,7 +163,7 @@ fun PMap(mapController: PMapController, uiState: PMapState, orientationState: Or
 
             }
 
-            if (uiState.gpxWaypoints.isNotEmpty()) {
+            if (uiState.gpxWaypoints.isNotEmpty() && uiState.isWaypointVisible) {
                 val wpts = uiState.gpxWaypoints.mapIndexed { idx, it ->
                     val markerIcon =
                         getDrawable(
@@ -226,6 +230,37 @@ fun PMainMenu(modifier: Modifier, mapController: PMapController, uiState: PMapSt
                     modifier = Modifier.size(30.dp),
                 )
             }
+            if (uiState.gpxWaypoints.isNotEmpty()) {
+                SmallFloatingActionButton(
+                    modifier = Modifier.padding(2.dp),
+                    contentColor = Parchement,
+                    containerColor = HunterGreen,
+                    shape = RoundedCornerShape(10.dp),
+                    onClick = {
+                        if (uiState.isWaypointVisible) {
+                            mapController.hideWaypoint()
+                            return@SmallFloatingActionButton
+                        }
+                        mapController.displayWaypoint()
+                    }) {
+                    if (uiState.isWaypointVisible) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "Masquer waypoint",
+                            modifier = Modifier.size(30.dp),
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.LocationOff,
+                            contentDescription = "Afficher waypoint",
+                            modifier = Modifier.size(30.dp),
+                        )
+                    }
+                }
+
+            }
+
+
             SmallFloatingActionButton(
                 modifier = Modifier.padding(2.dp),
                 contentColor = Parchement,

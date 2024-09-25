@@ -110,6 +110,7 @@ class MainActivity() : ComponentActivity() {
 
                         override fun clearGpxData() {
                             mapViewModel.clearGpxData()
+                            map.invalidate()
                         }
 
                         override fun bind(view: MapView) {
@@ -119,6 +120,17 @@ class MainActivity() : ComponentActivity() {
 
                         override fun onFileImportClick() {
                             openFileChooser()
+                        }
+
+                        override fun hideWaypoint() {
+                            mapViewModel.setWaypointVisible(false)
+                            map.invalidate()
+
+                        }
+
+                        override fun displayWaypoint() {
+                           mapViewModel.setWaypointVisible(true)
+                            map.invalidate()
                         }
 
                     })

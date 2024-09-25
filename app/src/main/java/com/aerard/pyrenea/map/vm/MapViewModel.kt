@@ -21,7 +21,8 @@ data class PMapState(
     val zoomLevel: Double = 15.0,
     val location: Location? = null,
     val gpxWaypoints: List<PWaypoint> = listOf(),
-    val isFollowing : Boolean = true
+    val isFollowing : Boolean = true,
+    val isWaypointVisible : Boolean = true
     )
 
 
@@ -85,6 +86,15 @@ class PMapViewModel() : ViewModel() {
             currentState.copy(
                 zoomLevel = zoom
             )
+        }
+    }
+
+    fun setWaypointVisible(isVisible: Boolean) {
+        _state.update { currentState ->
+            currentState.copy(
+                isWaypointVisible = isVisible
+            )
+
         }
     }
 }
