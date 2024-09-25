@@ -11,8 +11,8 @@ android {
         applicationId = "com.aerard.pyrenea"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "OSSAU - 1.1.0"
+        versionCode = 4
+        versionName = "OSSAU - 1.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
