@@ -6,7 +6,7 @@ Grâce à l'intégration des cartes topographiques OpenTopo, profitez de cartes 
 
 
 # DONE 1.2.0 (OSSAU)
-- Redesign du menu 
+`- Redesign du menu 
 - Effacer le tracer GPX sélectionner
-- Aller au départ du trajet selectioner
+- Aller au départ du trajet selectioner`
 
