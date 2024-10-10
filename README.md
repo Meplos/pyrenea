@@ -7,7 +7,8 @@ Grâce à l'intégration des cartes topographiques OpenTopo, profitez de cartes 
 # TODO
 
 ## 1.5.0 (next)
-- Offline support
+- Add crashlitics report
+- Gpx recording
 - Gpx profiling
     - D+
     - D-
@@ -15,12 +16,12 @@ Grâce à l'intégration des cartes topographiques OpenTopo, profitez de cartes 
     - Altitude profile
 
 ## 1.6.0
-- Gpx recording
 - Map searching
+- Gpx sharing
 
 ## 1.7.0
+- Offline support
 - Path finding with gpx save
-- Gpx sharing
 
 ## 1.8.0
 - Friend positioning (activable)
