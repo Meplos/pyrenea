@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.aerard.pyrenea.feature.tracevizualization.TraceViewModel
 import com.aerard.pyrenea.map.ui.PMapController
 import com.aerard.pyrenea.map.ui.PMapScreen
 import com.aerard.pyrenea.map.vm.OrientationViewModel
@@ -32,6 +33,7 @@ import kotlin.time.Duration.Companion.seconds
 class MainActivity() : ComponentActivity() {
 
     private val mapViewModel: PMapViewModel by viewModels()
+    private val traceViewModel: TraceViewModel by viewModels { TraceViewModel.Factory }
     private  val orientationViewModel : OrientationViewModel by viewModels()
 
     val locationRequest = LocationRequest.Builder(1.seconds.inWholeMilliseconds).setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY).setWaitForAccurateLocation(true).build()
@@ -46,7 +48,7 @@ class MainActivity() : ComponentActivity() {
             if (fis == null) {
                 return@let
             }
-            mapViewModel.onGpxFileChange(
+            traceViewModel.loadTraceFile(
                 fis
             )
         }
@@ -80,6 +82,7 @@ class MainActivity() : ComponentActivity() {
             PyreneaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { inner ->
                     val uiState by mapViewModel.state.collectAsStateWithLifecycle()
+                    val traceState by traceViewModel.state.collectAsStateWithLifecycle()
                     val orientationState by orientationViewModel.state.collectAsStateWithLifecycle()
                     if (isLocationGranted) {
                         fusedLocationService.lastLocation.addOnSuccessListener{ location : Location?->
@@ -89,7 +92,7 @@ class MainActivity() : ComponentActivity() {
                         }
                     }
 
-                    PMapScreen(inner, uiState, orientationState ,object : PMapController {
+                    PMapScreen(inner, uiState, traceState,orientationState ,object : PMapController {
                         lateinit var map : MapView
                         override fun handleZoom(value: Double) {
                            mapViewModel.setZoom(value)
@@ -109,7 +112,7 @@ class MainActivity() : ComponentActivity() {
                         }
 
                         override fun clearGpxData() {
-                            mapViewModel.clearGpxData()
+                            traceViewModel.clear()
                             map.invalidate()
                         }
 

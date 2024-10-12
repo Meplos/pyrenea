@@ -27,10 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.trace
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat.getDrawable
 import com.aerard.pyrenea.R
+import com.aerard.pyrenea.feature.tracevizualization.Trace
 import com.aerard.pyrenea.map.vm.OrientationState
 import com.aerard.pyrenea.map.vm.PMapState
 import com.aerard.pyrenea.ui.theme.HunterGreen
@@ -64,7 +66,7 @@ interface PMapController {
 
 @Composable
 fun PMapScreen(
-    inner: PaddingValues, uiState: PMapState,orientationState: OrientationState, mapController: PMapController,
+    inner: PaddingValues, uiState: PMapState, traceState: Trace, orientationState: OrientationState, mapController: PMapController,
 ) {
     Box(
         modifier = Modifier
@@ -73,14 +75,14 @@ fun PMapScreen(
             .fillMaxSize()
     ) {
         Box() {
-            PMap(mapController, uiState, orientationState)
+            PMap(mapController, uiState, traceState, orientationState)
         }
-        PMainMenu(Modifier.matchParentSize(), mapController, uiState)
+        PMainMenu(Modifier.matchParentSize(), mapController, uiState, traceState)
     }
 }
 
 @Composable
-fun PMap(mapController: PMapController, uiState: PMapState, orientationState: OrientationState) {
+fun PMap(mapController: PMapController, uiState: PMapState, traceState: Trace, orientationState: OrientationState) {
     var lastPath: Polyline? = null
     AndroidView(
         factory = { context ->
@@ -112,17 +114,17 @@ fun PMap(mapController: PMapController, uiState: PMapState, orientationState: Or
             view.overlayManager.removeAll(view.overlayManager.overlays())
             val info = MarkerInfoWindow(R.layout.marker_info_layout, view).apply {
             }
-            if (uiState.gpxPath.isNotEmpty()) {
+            if (traceState.path.isNotEmpty()) {
                 lastPath = Polyline(view, true)
                 lastPath?.apply {
                     outlinePaint.color =
                         Color.parseColor(uiState.gpxPathColor)
-                    uiState.gpxPath.forEach(this::addPoint)
+                    traceState.path.forEach(this::addPoint)
                     infoWindow = null
                 }
                 view.overlayManager.add(lastPath)
-                val start = uiState.gpxPath.first()
-                val end = uiState.gpxPath.last()
+                val start = traceState.path.first()
+                val end = traceState.path.last()
                 if (start.distanceToAsDouble(end) < 100) {
                     val startMarker = Marker(view).apply {
                         position = start
@@ -163,8 +165,8 @@ fun PMap(mapController: PMapController, uiState: PMapState, orientationState: Or
 
             }
 
-            if (uiState.gpxWaypoints.isNotEmpty() && uiState.isWaypointVisible) {
-                val wpts = uiState.gpxWaypoints.mapIndexed { idx, it ->
+            if (traceState.wpts.isNotEmpty() && uiState.isWaypointVisible) {
+                val wpts = traceState.wpts.mapIndexed { idx, it ->
                     val markerIcon =
                         getDrawable(
                             view.context,
@@ -209,20 +211,20 @@ fun PMap(mapController: PMapController, uiState: PMapState, orientationState: Or
 
 
 @Composable
-fun PMainMenu(modifier: Modifier, mapController: PMapController, uiState: PMapState) {
+fun PMainMenu(modifier: Modifier, mapController: PMapController, uiState: PMapState, traceState: Trace) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.End
     ) {
-        if (uiState.gpxPath.isNotEmpty()) {
+        if (traceState.path.isNotEmpty()) {
             SmallFloatingActionButton(
                 modifier = Modifier.padding(2.dp),
                 contentColor = Parchement,
                 containerColor = HunterGreen,
                 shape = RoundedCornerShape(10.dp),
                 onClick = {
-                    mapController.setCenter(uiState.gpxPath.first())
+                    mapController.setCenter(traceState.path.first())
                 }) {
                 Icon(
                     imageVector = Icons.Default.Flag,
@@ -230,7 +232,7 @@ fun PMainMenu(modifier: Modifier, mapController: PMapController, uiState: PMapSt
                     modifier = Modifier.size(30.dp),
                 )
             }
-            if (uiState.gpxWaypoints.isNotEmpty()) {
+            if (traceState.wpts.isNotEmpty()) {
                 SmallFloatingActionButton(
                     modifier = Modifier.padding(2.dp),
                     contentColor = Parchement,
